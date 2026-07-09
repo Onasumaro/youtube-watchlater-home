@@ -32,28 +32,111 @@ async function fetchWatchLaterPage() {
 
 function extractVideosFromHTML(html) {
     const videos = [];
+    const initialData = parseYouTubeInitialData(html);
 
-    const videoRegex = /"videoId":"(.*?)".*?"title":\{"runs":\[\{"text":"(.*?)"\}\]/g;
+    if (!initialData) return videos;
 
-    let match;
+    walkYouTubeData(initialData, "playlistVideoRenderer", renderer => {
+        if (videos.length >= 10) return;
 
-    while ((match = videoRegex.exec(html)) !== null) {
-        const videoId = match[1];
-        const title = match[2];
+        const videoId = renderer.videoId;
+        const title = getTitleText(renderer.title);
+
+        if (!videoId || !title) return;
 
         if (!videos.some(video => video.videoId === videoId)) {
             videos.push({
                 videoId,
                 title,
                 url: `https://www.youtube.com/watch?v=${videoId}`,
-                thumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
+                thumbnail: getThumbnailUrl(renderer.thumbnail, videoId)
             });
         }
-
-        if (videos.length >= 10) break;
-    }
+    });
 
     return videos;
+}
+
+function parseYouTubeInitialData(html) {
+    const marker = "ytInitialData";
+    const markerIndex = html.indexOf(marker);
+    if (markerIndex === -1) return null;
+
+    const start = html.indexOf("{", markerIndex);
+    if (start === -1) return null;
+
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+
+    for (let i = start; i < html.length; i++) {
+        const char = html[i];
+
+        if (inString) {
+            if (escaped) {
+                escaped = false;
+            } else if (char === "\\") {
+                escaped = true;
+            } else if (char === '"') {
+                inString = false;
+            }
+            continue;
+        }
+
+        if (char === '"') {
+            inString = true;
+        } else if (char === "{") {
+            depth++;
+        } else if (char === "}") {
+            depth--;
+
+            if (depth === 0) {
+                try {
+                    return JSON.parse(html.slice(start, i + 1));
+                } catch (error) {
+                    console.error(error);
+                    return null;
+                }
+            }
+        }
+    }
+
+    return null;
+}
+
+function walkYouTubeData(value, rendererKey, onVideoRenderer) {
+    if (!value || typeof value !== "object") return;
+
+    const renderer = value[rendererKey];
+    if (renderer) {
+        onVideoRenderer(renderer);
+    }
+
+    if (Array.isArray(value)) {
+        value.forEach(item => walkYouTubeData(item, rendererKey, onVideoRenderer));
+        return;
+    }
+
+    Object.values(value).forEach(item => walkYouTubeData(item, rendererKey, onVideoRenderer));
+}
+
+function getTitleText(title) {
+    if (!title) return "";
+    if (title.simpleText) return title.simpleText;
+    if (Array.isArray(title.runs)) {
+        return title.runs.map(run => run.text || "").join("");
+    }
+    return "";
+}
+
+function getThumbnailUrl(thumbnail, videoId) {
+    const thumbnails = thumbnail && thumbnail.thumbnails;
+
+    if (Array.isArray(thumbnails) && thumbnails.length > 0) {
+        return thumbnails[thumbnails.length - 1].url;
+    }
+
+    return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 }
 
 function renderVideos(videos, list) {
@@ -69,10 +152,15 @@ function renderVideos(videos, list) {
         item.className = "watch-later-item";
         item.href = video.url;
 
-        item.innerHTML = `
-      <img src="${video.thumbnail}" alt="">
-      <div class="watch-later-title">${video.title}</div>
-    `;
+        const thumbnail = document.createElement("img");
+        thumbnail.src = video.thumbnail;
+        thumbnail.alt = "";
+
+        const title = document.createElement("div");
+        title.className = "watch-later-title";
+        title.textContent = video.title;
+
+        item.append(thumbnail, title);
 
         list.appendChild(item);
     });
