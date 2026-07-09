@@ -1,0 +1,22 @@
+{
+    "manifest_version": 3,
+    "name": "YouTube Watch Later Home",
+    "version": "1.0",
+    "description": "YouTubeホームに後で見る動画を1列表示します。",
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.youtube.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "style.css"
+            ]
+        }
+    ],
+    "host_permissions": [
+        "https://www.youtube.com/*"
+    ]
+}

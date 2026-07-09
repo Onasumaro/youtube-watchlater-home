@@ -1,0 +1,51 @@
+#watch-later-home-box {
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 16px;
+    background: #0f0f0f;
+    color: white;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+#watch-later-home-box h2 {
+    font-size: 22px;
+    margin: 0 0 16px;
+}
+
+#watch-later-video-list {
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.watch-later-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    background: #181818;
+}
+
+.watch-later-item:hover {
+    background: #272727;
+}
+
+.watch-later-item img {
+    width: 180px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.watch-later-title {
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.4;
+}
