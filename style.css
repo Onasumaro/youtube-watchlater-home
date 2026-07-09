@@ -24,8 +24,10 @@
 
 .watch-later-item {
     display: flex;
+    flex: 0 0 200px;
+    flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     text-decoration: none;
     color: white;
     padding: 10px;
@@ -38,14 +40,23 @@
 }
 
 .watch-later-item img {
-    width: 180px;
+    width: 100%;
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
 }
 
 .watch-later-title {
+    display: -webkit-box;
+    width: 100%;
+    min-height: 44px;
+    max-height: 44px;
+    overflow: hidden;
     font-size: 16px;
     font-weight: bold;
     line-height: 1.4;
+    text-align: left;
+    text-overflow: ellipsis;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
 }
