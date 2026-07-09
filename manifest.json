@@ -2,7 +2,10 @@
     "manifest_version": 3,
     "name": "YouTube Watch Later Home",
     "version": "1.0",
-    "description": "YouTubeホームに後で見る動画を1列表示します。",
+    "description": "YouTubeホームに後で見る動画を横一列表示します。",
+    "icons": {
+        "128": "icons/icon128.png"
+    },
     "content_scripts": [
         {
             "matches": [
